@@ -1,0 +1,52 @@
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: mariadb
+spec:
+  resources:
+    claim:
+      name: mariadb-pvc
+...
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mariadd-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mariadb-pod
+  template:
+    metadata:
+      name: mariadb-pod
+      labels:
+        app: mariadb-pod
+    spec:
+      volumes:
+        - name: mariadb-pvc-storage
+          persistentVolumeClaim:
+            claimName: mariadb-pvc
+        - name: localtime
+          hostPath:
+            path: /etc/localtime
+            type: File
+      containers:
+        - name: mariadb-container
+          image: docker.io/library/mariadb:latest
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: MYSQL_DATABASE
+              value: 'nextcloud'
+            - name: MYSQL_USER
+              value: 'nextcloud'
+          envFrom:
+            - configMapRef:
+                name: mariadb-configmap
+          volumeMounts:
+            - name: mariadb-pvc-storage
+              mountPath: /var/lib/mysql
+            - name: localtime
+              mountPath: /etc/localtime
+...

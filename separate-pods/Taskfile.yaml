@@ -1,0 +1,64 @@
+---
+# https://taskfile.dev
+version: '3'
+
+tasks:
+  db-start:
+    desc: Start the MariaDB Podman Pods.
+    cmds:
+      - "podman play kube \
+        --configmap mariadb-configmap.yaml \
+        --network nextcloud \
+        {{.CLI_ARGS}} \
+        mariadb-deployment.yaml"
+
+  db-stop:
+    desc: Stop the MariaDB Podman Pods.
+    cmds:
+      - "podman play kube \
+         --down \
+        --network nextcloud \
+         {{.CLI_ARGS}} \
+         mariadb-deployment.yaml"
+
+  nc-start:
+    desc: Start the NextCloud Podman Pods.
+    cmds:
+      - "podman play kube \
+        --configmap nextcloud-configmap.yaml \
+        --network nextcloud \
+        {{.CLI_ARGS}} \
+        nextcloud-deployment.yaml"
+
+  nc-stop:
+    desc: Stop the NextCloud Podman Pods.
+    cmds:
+      - "podman play kube \
+         --down \
+        --network nextcloud \
+         {{.CLI_ARGS}} \
+         nextcloud-deployment.yaml"
+
+  network-create:
+    desc: Create the NextCloud Podman Network.
+    cmds:
+      - podman network create nextcloud
+
+  network-disconnect:
+    desc: Delete the NextCloud Podman Network.
+    cmds:
+      - podman network disconnect nextcloud
+
+  nc-volume-cleanup:
+    cmds:
+      - podman volume rm nextcloud nextcloud-pvc
+
+  db-volume-cleanup:
+    cmds:
+      - podman volume rm mariadb mariadb-pvc
+
+  volume-cleanup:
+    deps:
+      - nc-volume-cleanup
+      - db-volume-cleanup
+...
