@@ -7,8 +7,6 @@ tasks:
     desc: Start the NextCloud Podman Pods.
     cmds:
       - "podman play kube \
-        --configmap nextcloud-configmap.yaml \
-        --configmap mariadb-configmap.yaml \
         {{.CLI_ARGS}} \
         nextcloud-deployment.yaml"
 

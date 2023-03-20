@@ -1,9 +1,0 @@
----
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: mariadb-configmap
-data:
-  MYSQL_ROOT_PASSWORD: 'supersecretpassword'
-  MYSQL_PASSWORD: 'supersecretpassword'
-...
