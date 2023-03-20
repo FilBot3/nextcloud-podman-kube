@@ -1,0 +1,66 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nextcloud-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nextcloud-pod
+  template:
+    metadata:
+      name: nextcloud-pod
+      labels:
+        app: nextcloud-pod
+    spec:
+      volumes:
+        - name: nextcloud-pvc-storage
+          persistentVolumeClaim:
+            claimName: nextcloud-pvc
+        - name: mariadb-pvc-storage
+          persistentVolumeClaim:
+            claimName: mariadb-pvc
+        - name: localtime
+          hostPath:
+            path: /etc/localtime
+            type: File
+      containers:
+        - name: mariadb-container
+          image: docker.io/library/mariadb:latest
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: MYSQL_DATABASE
+              value: 'nextcloud'
+            - name: MYSQL_USER
+              value: 'nextcloud'
+          envFrom:
+            - configMapRef:
+                name: mariadb-configmap
+          volumeMounts:
+            - name: mariadb-pvc-storage
+              mountPath: /var/lib/mysql
+            - name: localtime
+              mountPath: /etc/localtime
+        - name: nextcloud-container
+          image: docker.io/library/nextcloud:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 80
+              hostPort: 9080
+              protocol: TCP
+          env:
+            - name: MYSQL_DATABASE
+              value: 'nextcloud'
+            - name: MYSQL_USER
+              value: 'nextcloud'
+          envFrom:
+            - configMapRef:
+                name: nextcloud-configmap
+          volumeMounts:
+            - name: nextcloud-pvc-storage
+              mountPath: /var/www/html
+            - name: localtime
+              mountPath: /etc/localtime
+...
+

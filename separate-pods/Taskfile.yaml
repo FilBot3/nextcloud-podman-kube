@@ -51,11 +51,11 @@ tasks:
 
   nc-volume-cleanup:
     cmds:
-      - podman volume rm nextcloud nextcloud-pvc
+      - podman volume rm nextcloud-pvc
 
   db-volume-cleanup:
     cmds:
-      - podman volume rm mariadb mariadb-pvc
+      - podman volume rm mariadb-pvc
 
   volume-cleanup:
     deps:
